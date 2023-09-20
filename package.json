@@ -1,0 +1,23 @@
+{
+  "name": "kiroku",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "tsc": "tsc",
+    "start": "bun run ./src/index.ts",
+    "dev": "tsc && bun start"
+  },
+  "devDependencies": {
+    "@types/steamapi": "^2.2.2",
+    "bun-types": "latest",
+    "typescript": "^5.2.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "discord.js": "^14.13.0",
+    "dotenv": "^16.3.1",
+    "steamapi": "^2.4.2"
+  }
+}
