@@ -69,7 +69,7 @@ async function main() {
                 latestReturnData[key] = value;
             }
         }
-    }, 100);
+    }, 500);
 
     const server = Bun.serve({
         port: 3000,
