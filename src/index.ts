@@ -24,6 +24,10 @@ interface ReturnData {
 
 let latestReturnData: ReturnData = {};
 
+function sendJsonResponse(data: any) {
+    return new Response(JSON.stringify(data));
+}
+
 async function main() {
     if (!ConfigProvider.isReady()) return;
 
@@ -31,6 +35,7 @@ async function main() {
         let newData: ReturnData = {};
 
         for (let [key, value] of Object.entries(ConfigProvider.getConfig().users)) {
+            key = key.toLowerCase();
             newData[key] = {};
 
             // Discord
@@ -74,7 +79,28 @@ async function main() {
     const server = Bun.serve({
         port: 3000,
         async fetch(request: Request) {
-            return new Response(JSON.stringify(latestReturnData));
+            let url = new URL(request.url);
+            let user = url.searchParams.get('user');
+
+            if (!user || user === null) {
+                if (!ConfigProvider.getConfig().global.lookup_all)
+                    return sendJsonResponse({ success: false, message: 'Lookup all is disabled' });
+
+                return sendJsonResponse({
+                    success: true,
+                    data: latestReturnData
+                });
+            }
+
+            user = user.toLowerCase();
+
+            if (!latestReturnData[user]) return sendJsonResponse({ success: false, message: 'Unable to find user' });
+            const userData = latestReturnData[user];
+
+            return sendJsonResponse({
+                success: true,
+                data: userData
+            });
         }
     });
 

@@ -3,6 +3,7 @@ import { Client, Events, GatewayIntentBits } from 'discord.js';
 
 export interface Config {
     global: {
+        lookup_all: boolean;
         discord_guild_id?: string;
         discord_bot_token?: string;
         steam_api_key?: string;
@@ -14,7 +15,9 @@ export interface Config {
 
 class ConfigProvider {
     private config: Config = {
-        global: {},
+        global: {
+            lookup_all: false
+        },
         users: {}
     };
     private ready = false;
