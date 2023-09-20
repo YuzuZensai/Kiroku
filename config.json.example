@@ -1,0 +1,17 @@
+{
+    "global": {
+        "lookup_all": true,
+        "discord_bot_token": "your_discord_token",
+        "discord_guild_id": "your_guild_id",
+        "steam_api_key": "your_steam_api"
+    },
+    "users": {
+        "user1": {
+            "discord": "user1_discord_id",
+            "steam": "user1_steam_id"
+        },
+        "user2": {
+            "discord": "user2_discord_id"
+        }
+    }
+}
