@@ -1,4 +1,4 @@
-import { Client, Events, GatewayIntentBits } from 'discord.js';
+import { ActivityType, Client, Events, GatewayIntentBits } from 'discord.js';
 
 import ConfigProvider from './ConfigProvider';
 
@@ -15,6 +15,25 @@ class DiscordProvider {
         this.client.once(Events.ClientReady, (client) => {
             console.log('[DiscordProvider]', `Ready! Logged in as ${client.user.tag}`);
             this.ready = true;
+
+            const setStatus = () => {
+                this.client?.user?.setPresence({
+                    activities: [
+                        {
+                            name: 'custom',
+                            type: ActivityType.Custom,
+                            state: '🥺 Staring at a cutie'
+                        }
+                    ],
+                    status: 'online',
+                    afk: false
+                });
+            };
+            setStatus();
+
+            setInterval(() => {
+                setStatus();
+            }, 1000 * 60 * 5);
         });
 
         const token = ConfigProvider.getConfig().global.discord_bot_token;
