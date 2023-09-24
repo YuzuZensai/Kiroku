@@ -1,3 +1,3 @@
 # 💭 Kiroku
 
-Multi-platform activity fetcher 
+Kiroku「記録」・‎ ‎ Multi-platform activity fetcher
