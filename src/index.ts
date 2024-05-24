@@ -25,7 +25,10 @@ interface ReturnData {
 let latestReturnData: ReturnData = {};
 
 function sendJsonResponse(data: any) {
-    return new Response(JSON.stringify(data));
+    let res = new Response(JSON.stringify(data));
+    res.headers.set('Access-Control-Allow-Origin', '*');
+    res.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    return res;
 }
 
 async function main() {
