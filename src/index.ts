@@ -4,6 +4,7 @@ dotenv.config();
 import ConfigProvider from './providers/ConfigProvider';
 import DiscordProvider from './providers/DiscordProvider';
 import SteamProvider from './providers/SteamProvider';
+import { Elysia, t } from 'elysia';
 
 // 1 minute
 const REFRESH_TIME = 60 * 1000;
@@ -24,15 +25,9 @@ interface ReturnData {
 
 let latestReturnData: ReturnData = {};
 
-function sendJsonResponse(data: any) {
-    let res = new Response(JSON.stringify(data));
-    res.headers.set('Access-Control-Allow-Origin', '*');
-    res.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    return res;
-}
-
 async function main() {
     if (!ConfigProvider.isReady()) return;
+    const port = process.env.PORT || 3000;
 
     setInterval(async () => {
         let newData: ReturnData = {};
@@ -79,34 +74,36 @@ async function main() {
         }
     }, 500);
 
-    const server = Bun.serve({
-        port: 3000,
-        async fetch(request: Request) {
-            let url = new URL(request.url);
-            let user = url.searchParams.get('user');
+    const server = new Elysia()
+        .get('/', async ({ query, error }) => {
+            query: t.Object({
+                user: t.Optional(t.String())
+            });
 
-            if (!user || user === null) {
+            let user = query.user;
+
+            if (!user) {
                 if (!ConfigProvider.getConfig().global.lookup_all)
-                    return sendJsonResponse({ success: false, message: 'Lookup all is disabled' });
+                    return error('Forbidden', { success: false, message: 'Lookup all is disabled' });
 
-                return sendJsonResponse({
+                return {
                     success: true,
                     data: latestReturnData
-                });
+                };
             }
 
             user = user.toLowerCase();
 
-            if (!latestReturnData[user]) return sendJsonResponse({ success: false, message: 'Unable to find user' });
+            if (!latestReturnData[user]) return error('Not Found', { success: false, message: 'Unable to find user' });
             const userData = latestReturnData[user];
 
-            return sendJsonResponse({
+            return {
                 success: true,
                 data: userData
-            });
-        }
-    });
+            };
+        })
+        .listen(port);
 
-    console.log(`Listening on localhost:${server.port}`);
+    console.log(`Listening on port ${port}`);
 }
 main();
