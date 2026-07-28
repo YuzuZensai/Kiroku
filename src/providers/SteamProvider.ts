@@ -1,27 +1,26 @@
-import SteamAPI from 'steamapi';
+import SteamAPI, { type UserSummary } from 'steamapi';
 
 import ConfigProvider from './ConfigProvider';
 
 class SteamProvider {
-    private client: SteamAPI;
+    private client: SteamAPI | undefined;
     private ready: boolean = false;
 
     constructor() {
-        this.client = new SteamAPI('dummy');
-        const token = ConfigProvider.getConfig().global.steam_api_key;
+        const apiKey = ConfigProvider.getConfig().global.steam_api_key;
 
-        if (!token) {
+        if (!apiKey) {
             console.error('[SteamProvider]', 'Missing steam_api_key in config');
             return;
         }
 
-        this.client = new SteamAPI(token);
+        this.client = new SteamAPI(apiKey);
         this.ready = true;
     }
 
-    public async getProfile(id: string) {
-        let profile = await this.client.getUserSummary(id);
-        return profile;
+    public async getProfile(id: string): Promise<UserSummary> {
+        if (!this.client) throw new Error('SteamProvider is not ready');
+        return this.client.getUserSummary(id);
     }
 
     public get isReady(): boolean {

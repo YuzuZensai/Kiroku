@@ -1,19 +1,8 @@
-import fs from 'fs';
-import { Client, Events, GatewayIntentBits } from 'discord.js';
+import fs from 'node:fs';
 
-export interface Config {
-    global: {
-        lookup_all: boolean;
-        discord_guild_id?: string;
-        discord_bot_token?: string;
-        steam_api_key?: string;
-    };
-    users: {
-        [key: string]: any;
-    };
-}
+import type { Config } from '../types';
 
-class ConfigProvider {
+export class ConfigProvider {
     private config: Config = {
         global: {
             lookup_all: false
@@ -22,14 +11,13 @@ class ConfigProvider {
     };
     private ready = false;
 
-    constructor() {
+    constructor(path = './config.json') {
         try {
-            let data = fs.readFileSync('./config.json', 'utf8');
+            const data = fs.readFileSync(path, 'utf8');
             this.config = JSON.parse(data);
             this.ready = true;
         } catch (err) {
             console.error('[ConfigProvider]', err);
-            return;
         }
     }
 

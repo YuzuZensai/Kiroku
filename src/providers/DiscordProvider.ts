@@ -1,6 +1,8 @@
-import { ActivityType, Client, Events, GatewayIntentBits } from 'discord.js';
+import { ActivityType, Client, Events, GatewayIntentBits, type Presence, type User } from 'discord.js';
 
 import ConfigProvider from './ConfigProvider';
+
+const STATUS_REFRESH_INTERVAL = 5 * 60 * 1000;
 
 class DiscordProvider {
     private client: Client;
@@ -17,7 +19,7 @@ class DiscordProvider {
             this.ready = true;
 
             const setStatus = () => {
-                this.client?.user?.setPresence({
+                client.user.setPresence({
                     activities: [
                         {
                             name: 'custom',
@@ -31,34 +33,30 @@ class DiscordProvider {
             };
             setStatus();
 
-            setInterval(() => {
-                setStatus();
-            }, 1000 * 60 * 5);
+            setInterval(setStatus, STATUS_REFRESH_INTERVAL);
         });
 
         const token = ConfigProvider.getConfig().global.discord_bot_token;
-        const guild_id = ConfigProvider.getConfig().global.discord_guild_id;
+        const guildId = ConfigProvider.getConfig().global.discord_guild_id;
 
-        if (!token || !guild_id) {
+        if (!token || !guildId) {
             console.error('[DiscordProvider]', 'Missing token or guild_id in config.json');
             return;
         }
 
-        this.guildId = guild_id;
+        this.guildId = guildId;
 
         this.client.login(token);
     }
 
-    public async getUser(id: string) {
-        const user = this.client.users.cache.get(id) || (await this.client.users.fetch(id));
-        return user;
+    public async getUser(id: string): Promise<User> {
+        return this.client.users.cache.get(id) ?? (await this.client.users.fetch(id));
     }
 
-    public async getPresence(id: string) {
-        const guild = this.client.guilds.cache.get(this.guildId) || (await this.client.guilds.fetch(this.guildId));
-        const member = guild.members.cache.get(id) || (await guild.members.fetch(id));
-        const presence = member.presence;
-        return presence;
+    public async getPresence(id: string): Promise<Presence | null> {
+        const guild = this.client.guilds.cache.get(this.guildId) ?? (await this.client.guilds.fetch(this.guildId));
+        const member = guild.members.cache.get(id) ?? (await guild.members.fetch(id));
+        return member.presence;
     }
 
     public get isReady(): boolean {

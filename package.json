@@ -1,25 +1,36 @@
 {
-  "name": "kiroku",
-  "module": "src/index.ts",
-  "type": "module",
-  "scripts": {
-    "tsc": "tsc",
-    "start": "bun --watch run ./src/index.ts",
-    "dev": "tsc && bun start"
-  },
-  "devDependencies": {
-    "@types/bun": "^1.1.10",
-    "@types/steamapi": "^2.2.5",
-    "bun-types": "^1.1.29",
-    "typescript": "^5.6.2"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "discord.js": "^14.16.3",
-    "dotenv": "^16.4.5",
-    "elysia": "^1.1.17",
-    "steamapi": "^3.0.12"
-  }
+    "name": "kiroku",
+    "module": "src/index.ts",
+    "type": "module",
+    "scripts": {
+        "tsc": "tsc",
+        "start": "bun --watch run ./src/index.ts",
+        "dev": "tsc && bun start",
+        "lint": "biome lint .",
+        "lint:fix": "biome lint --write .",
+        "format": "biome format .",
+        "format:fix": "biome format --write .",
+        "typecheck": "tsc --noEmit",
+        "check": "biome check . && tsc --noEmit",
+        "check:fix": "biome check --write . && tsc --noEmit",
+        "test": "bun test",
+        "prepare": "husky"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "2.5.6",
+        "@sinclair/typebox": "^0.34.52",
+        "@types/bun": "^1.3.14",
+        "bun-types": "^1.3.14",
+        "husky": "^9.1.7",
+        "typescript": "^7.0.2"
+    },
+    "peerDependencies": {
+        "typescript": "^7.0.0"
+    },
+    "dependencies": {
+        "discord.js": "^14.27.0",
+        "dotenv": "^17.4.2",
+        "elysia": "^1.4.29",
+        "steamapi": "^3.1.5"
+    }
 }

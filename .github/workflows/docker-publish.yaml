@@ -5,43 +5,69 @@ on:
         branches:
             - '*'
         tags:
-            - '*'
+            - '*.*.*'
+    pull_request:
 
 env:
     IMAGE_NAME: ghcr.io/yuzuzensai/kiroku
 
 jobs:
-    build:
+    check:
         runs-on: ubuntu-latest
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
+
+            - name: Set up Bun
+              uses: oven-sh/setup-bun@v2
+
+            - name: Install dependencies
+              run: bun install --frozen-lockfile
+
+            - name: Lint, format, and typecheck
+              run: bun run check
+
+            - name: Test
+              run: bun test
+
+    docker:
+        needs: check
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
 
             - name: Log in to the Container registry
-              uses: docker/login-action@v2
+              if: github.event_name != 'pull_request'
+              uses: docker/login-action@v3
               with:
                   registry: ghcr.io
-                  username: ${{ secrets.GHCR_IO_USERNAME }}
-                  password: ${{ secrets.GHCR_IO_TOKEN }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Docker meta
               id: docker-meta
-              uses: docker/metadata-action@v3
+              uses: docker/metadata-action@v5
               with:
                   images: |
                       ${{ env.IMAGE_NAME }}
                   tags: |
-                      type=raw,value=latest,enable=${{ github.ref_type == 'tag' && !contains(github.ref_name, '-') }}
+                      type=semver,pattern={{version}}
+                      type=semver,pattern={{major}}.{{minor}}
+                      type=semver,pattern={{major}}
                       type=raw,value=latest-dev,enable=${{ github.ref_type == 'branch' }}
-                      type=raw,value=${{ github.ref_name }}
+                      type=raw,value=${{ github.ref_name }},enable=${{ github.ref_type == 'branch' }}
                       type=raw,value=${{ github.sha }},enable=${{ github.ref_type == 'branch' }}
                   flavor: |
-                      latest=false
+                      latest=${{ github.ref_type == 'tag' && !contains(github.ref_name, '-') }}
 
             - name: Docker Build and Push
-              uses: docker/build-push-action@v2
+              uses: docker/build-push-action@v6
               with:
                   context: .
-                  push: true
+                  push: ${{ github.event_name != 'pull_request' }}
                   tags: ${{ steps.docker-meta.outputs.tags }}
                   labels: ${{ steps.docker-meta.outputs.labels }}
