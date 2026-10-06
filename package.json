@@ -29,7 +29,7 @@
     },
     "dependencies": {
         "discord.js": "^14.27.0",
-        "dotenv": "^17.4.2",
+        "dotenv": "^18.0.5",
         "elysia": "^1.4.29",
         "steamapi": "^3.1.5"
     }
